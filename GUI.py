@@ -8,6 +8,7 @@ import tkinter as tk
 from PIL import ImageTk, Image
 from random import randint
 import os
+from time import sleep
 
 win2 = tk.Tk()
 win2.title("Minesweeper")
@@ -27,6 +28,9 @@ titulo.grid(column=0, row=0, columnspan=renglones, rowspan=2*d, sticky="NSWE")
 #Time needs to be researched and applied
 tiempo = tk.Label(text="0:00", font=("Bahnschrift"))
 tiempo.grid(column=4*d, row=3*d, columnspan=2*d, sticky="NSWE")
+
+CantBombas = tk.Label(text=nbombas, font=("Bahnschrift"))
+CantBombas.grid(column=4*d, row=14*d, columnspan=2*d, sticky="NSWE")
 
 #List of frames that will turn to matrix
 LB = []
@@ -67,54 +71,33 @@ while i < nbombas:
         i += 1
 
 #Function declaring what happens when a frame with a bomb is chosen
-#Becomes red and coming soon, coming soon a bomb label :)
-
-
+#Becomes red, bomb label, missing to end game
 def botonDeBomba(xc, yc):
-    if images[yc][xc] != False:
-        global nbombas
-        images[yc][xc].pack_forget()
-        images[yc][xc] = False
-        nbombas += 1
-        CantBombas.configure(text=nbombas)
-        if nbombas == 0:
-            zeroBombs()
-    else:
+    if images[yc][xc] == False:
         LB[yc][xc].configure(bg="red")
         flagPhoto = Label(LB[yc][xc], image=bomb, bg="red")
         images[yc][xc] = flagPhoto
         flagPhoto.pack()
+    else:
+        ridFlag(xc, yc)
+        
+labels = [[False for x in range(columnas)] for y in range(renglones)]
 
 #Function declaring what happens when a frame with a number is chosen
 #Becomes white and displays number
-
-
 def botonSinBombaN(xc, yc):
-    if images[yc][xc] != False:
-        global nbombas
-        images[yc][xc].pack_forget()
-        images[yc][xc] = False
-        nbombas += 1
-        CantBombas.configure(text=nbombas)
-    else:
+    if images[yc][xc] == False:
         LB[yc][xc].configure(bg="white")
-        num = tk.Label(LB[yc][xc], text=LV[yc][xc], bg="white").pack()
+        labels[yc][xc] = Label(LB[yc][xc], text=LV[yc][xc], bg="white")
+        labels[yc][xc].pack()
+    else:
+        ridFlag(xc, yc)
 
 #Function declaring what happens when a blank frame is chosen
 #Becomes white and does the same with blank frames surrounding it
 #Process is stopped when it finds and displays numbers
-
-
 def botonSinBomba(xc, yc):
-    if images[yc][xc] != False:
-        global nbombas
-        images[yc][xc].pack_forget()
-        images[yc][xc] = False
-        nbombas += 1
-        CantBombas.configure(text=nbombas)
-        if nbombas == 0:
-            zeroBombs()
-    else:
+    if images[yc][xc] == False:
         LB[yc][xc].configure(bg="white")
         x1 = -1
         y1 = -1
@@ -130,32 +113,55 @@ def botonSinBomba(xc, yc):
                     if (LV[yc+j][xc+k] is False):
                         botonSinBomba(xc+k, yc+j)
                     elif (LV[yc+j][xc+k] is not True):
-                        botonSinBombaN(xc+k, yc+j)
+                        botonSinBombaN(xc+k, yc+j)      
+    else:
+        ridFlag(xc, yc)
 
-#Saves de flags to be able to use them in other funcions
+#Saves the flags to be able to use them in other funcions
 images = [[False for x in range(columnas)] for y in range(renglones)]
-
 
 def putFlag(xc, yc):
     if images[yc][xc] == False:
         global nbombas
-        flagPhoto = Label(LB[yc][xc], image=flag, bg="gray")
-        images[yc][xc]=flagPhoto
-        flagPhoto.pack()
-        bindwidgets(flagPhoto, xc, yc)
+        images[yc][xc] = Label(LB[yc][xc], image=flag, bg="gray")
+        images[yc][xc].pack()
+        bindwidgets(images[yc][xc], xc, yc)
         nbombas -= 1
         CantBombas.configure(text=nbombas)
         if nbombas == 0:
             zeroBombs()
 
+def ridFlag(xc, yc):
+    global nbombas
+    images[yc][xc].pack_forget()
+    images[yc][xc] = False
+    nbombas += 1
+    CantBombas.configure(text=nbombas)
+    if nbombas == 0:
+        print("Se llama el metodo")
+        zeroBombs()
+
 def zeroBombs():
-    count = 0
+    value = True
     for a in range(renglones):
         for b in range(columnas):
-            if LV[a][b] is True and images[a][b] is not False:
-                count += 1
-    if count == 10:
-        print("wuuu")
+            if LV[a][b] is not True and images[a][b] is not False:
+                print("Se rompe el metodo")
+                value = False
+    if value:
+        print("Entra al loop")
+        for a in range(renglones):
+            for b in range(columnas):
+
+                if images[a][b] is not False:
+                    images[a][b].pack_forget()
+                if labels[a][b] is not False:
+                    labels[a][b].pack_forget()
+
+                if LV[a][b] is True:
+                    LB[a][b].configure(background="forest green")
+                else:
+                    LB[a][b].configure(background="lime green")
 
 def bindwidgets(wid, xc, yc):
     if(LV[yc][xc] is True):
@@ -170,6 +176,7 @@ def bindwidgets(wid, xc, yc):
     wid.bind("<Button-3>", lambda event, xc=xc, 
                  yc=yc: putFlag(xc, yc))
 
+#Creation of frames
 for yc in range(renglones):
     L = []
     for xc in range(columnas):
@@ -179,10 +186,6 @@ for yc in range(renglones):
         boton.grid(column=((xc+1)*d), row=((yc+4)*d), sticky="NSEW")
         L.append(boton)
     LB.append(L)
-
-CantBombas = tk.Label(
-    text=nbombas, font=("Bahnschrift"))
-CantBombas.grid(column=4*d, row=14*d, columnspan=2*d, sticky="NSWE")
 
 for y in range(14*d):
     win2.grid_rowconfigure(y, weight=1)
