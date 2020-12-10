@@ -83,10 +83,36 @@ def juego():
     #Becomes red, bomb label, missing to end game
     def botonDeBomba(xc, yc):
         if images[yc][xc] == False:
-            LB[yc][xc].configure(bg="red")
-            flagPhoto = tk.Label(LB[yc][xc], image=bomb, bg="red")
+            LB[yc][xc].configure(bg="red4")
+            flagPhoto = tk.Label(LB[yc][xc], image=bomb, bg="red4")
             images[yc][xc] = flagPhoto
             flagPhoto.pack()
+
+            #CAMBIAR CONDICIONES ----------------------
+
+            for a in range(renglones):
+                for b in range(columnas):
+
+                    if LV[a][b] is True:
+                        LB[a][b].configure(bg="red4")
+                    else:
+                        LB[a][b].configure(bg="red")
+
+                    if images[a][b] is not False:
+                        if LV[a][b] is True:
+                            images[a][b].configure(bg="red4")
+                        else:
+                            images[a][b].configure(bg="red")
+                    if labels[a][b] is not False:
+                        labels[a][b].pack_forget()
+
+
+            CantBombas.grid_forget()
+            botonRegresar = Button(text="Regresar", font=("Bahnschrift"), command=regresar, bg="gray")
+            botonRegresar.grid(column=4*d, row=14*d, columnspan=2*d, sticky="NSWE")
+
+            #-------------------------------------------
+
         else:
             ridFlag(xc, yc)
             
@@ -97,7 +123,7 @@ def juego():
             LB[yc][xc].configure(bg="white")
             labels[yc][xc] = tk.Label(LB[yc][xc], text=LV[yc][xc], bg="white")
             labels[yc][xc].pack()
-        else:
+        if images[yc][xc] is not True and labels[yc][xc] == False:
             ridFlag(xc, yc)
 
     #Function declaring what happens when a blank frame is chosen
@@ -128,7 +154,7 @@ def juego():
     #It also decreases the number of bombs displayed at the bottom
     #If the amount of boombs is zero, it runs the zerobombs function
     def putFlag(xc, yc):
-        if images[yc][xc] == False:
+        if images[yc][xc] == False and labels[yc][xc] == False:
             images[yc][xc] = tk.Label(LB[yc][xc], image=flag, bg="gray")
             images[yc][xc].pack()
             bindwidgets(images[yc][xc], xc, yc)
@@ -185,7 +211,7 @@ def juego():
         wid.bind("<Button-3>", lambda event, xc=xc, 
                     yc=yc: putFlag(xc, yc))
 
-    #Creation of frames
+    #Creation of frames for the grid buttons
     for yc in range(renglones):
         L = []
         for xc in range(columnas):
@@ -196,9 +222,9 @@ def juego():
             L.append(boton)
         LB.append(L)
 
+    #Division of the window into a grid
     for y in range(14*d):
         win2.grid_rowconfigure(y, weight=1)
-
     for x in range(renglones):
         win2.grid_columnconfigure(x, weight=1)
 
