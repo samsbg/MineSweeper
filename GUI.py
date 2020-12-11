@@ -10,26 +10,24 @@ from random import randint
 import os
 from time import sleep
 
-def juego():
+def juego(d):
 
     win2 = tk.Tk()
     win2.title("Minesweeper")
-    win2.geometry("290x406")
     win2.iconbitmap(os.path.abspath("BombIcon.ico"))
 
     #Difficulty 1-3 that will be set from another page
     #The size of the grid like the number of bombs are assigned from this
-    d = 1
     columnas = 8*d
     renglones = 10*d
     juego.nbombas = int(80*(d**2)*0.125*(1+0.2*(d-1)))
 
     #Time needs to be researched and applied
     tiempo = tk.Label(text="0:00", font=("Bahnschrift"))
-    tiempo.grid(column=4*d, row=3*d, columnspan=2*d, sticky="NSWE")
+    tiempo.grid(column=4*d, row=2*d, columnspan=2*d, rowspan=d, sticky="NSWE")
 
     CantBombas = tk.Label(text=juego.nbombas, font=("Bahnschrift"))
-    CantBombas.grid(column=4*d, row=14*d, columnspan=2*d, sticky="NSWE")
+    CantBombas.grid(column=4*d, row=14*d, columnspan=2*d, rowspan=d, sticky="NSWE")
 
     #List of frames that will turn to matrix
     LB = []
@@ -74,10 +72,10 @@ def juego():
     def regresar():
         print("regresar")
         win2.destroy()
-        juego()
+        juego(d)
 
     titulo = tk.Button(text="Minesweeper", font=("Bahnschrift", 32), command=regresar)
-    titulo.grid(column=0, row=0, columnspan=renglones, rowspan=2*d, sticky="NSWE")
+    titulo.grid(column=0, row=0, columnspan=10*d, rowspan=2*d, sticky="NSWE")
 
     #Function declaring what happens when a frame with a bomb is chosen
     #Becomes red, bomb label, missing to end game
@@ -87,8 +85,6 @@ def juego():
             flagPhoto = tk.Label(LB[yc][xc], image=bomb, bg="red4")
             images[yc][xc] = flagPhoto
             flagPhoto.pack()
-
-            #CAMBIAR CONDICIONES ----------------------
 
             for a in range(renglones):
                 for b in range(columnas):
@@ -110,9 +106,6 @@ def juego():
             CantBombas.grid_forget()
             botonRegresar = Button(text="Regresar", font=("Bahnschrift"), command=regresar, bg="gray")
             botonRegresar.grid(column=4*d, row=14*d, columnspan=2*d, sticky="NSWE")
-
-            #-------------------------------------------
-
         else:
             ridFlag(xc, yc)
             
@@ -215,11 +208,11 @@ def juego():
     for yc in range(renglones):
         L = []
         for xc in range(columnas):
-            boton = tk.Frame(bg="gray", highlightbackground="black",
-                            highlightthickness=0.5, width=25, height=25)
+            boton = tk.Frame(bg="gray", highlightbackground="black", highlightthickness=0.5, width=25, height=25)
             bindwidgets(boton,xc,yc)
-            boton.grid(column=((xc+1)*d), row=((yc+4)*d), sticky="NSEW")
+            boton.grid(column=(xc+d), row=(yc+3*d), sticky="NSEW")
             L.append(boton)
+
         LB.append(L)
 
     #Division of the window into a grid
@@ -230,4 +223,4 @@ def juego():
 
     win2.mainloop()
 
-juego()
+juego(3)
