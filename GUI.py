@@ -8,9 +8,11 @@ import tkinter as tk
 from PIL import ImageTk, Image
 from random import randint
 import os
-from time import sleep
+import time
 
 def juego(d):
+
+    primeraPantalla.win1.destroy()
 
     win2 = tk.Tk()
     win2.title("Minesweeper")
@@ -21,10 +23,6 @@ def juego(d):
     columnas = 8*d
     renglones = 10*d
     juego.nbombas = int(80*(d**2)*0.125*(1+0.2*(d-1)))
-
-    #Time needs to be researched and applied
-    tiempo = tk.Label(text="0:00", font=("Bahnschrift"))
-    tiempo.grid(column=4*d, row=2*d, columnspan=2*d, rowspan=d, sticky="NSWE")
 
     CantBombas = tk.Label(text=juego.nbombas, font=("Bahnschrift"))
     CantBombas.grid(column=4*d, row=14*d, columnspan=2*d, rowspan=d, sticky="NSWE")
@@ -69,10 +67,30 @@ def juego(d):
                         LV[y+j][x+k] += 1
             i += 1
 
+    juego.mm = 0
+    juego.ss = 0
+    juego.valor = False
+
+    def cambiarTiempo():
+        if juego.valor == False:
+            juego.ss = juego.ss + 1
+            if juego.ss == 60:
+                juego.mm = juego.mm + 1
+                juego.ss = 0
+            tiempo.configure(text="{0}:{1:02d}".format(juego.mm, juego.ss))
+            if juego.mm <= 99:
+                tiempo.after(1000, cambiarTiempo)
+
+    #Time needs to be researched and applied
+    tiempo = tk.Label(text="{0}:{1:02d}".format(juego.mm, juego.ss), font=("Bahnschrift"))
+    tiempo.grid(column=4*d, row=2*d, columnspan=2*d, rowspan=d, sticky="NSWE")
+
+    tiempo.after(1000, cambiarTiempo)
+
     def regresar():
         print("regresar")
         win2.destroy()
-        juego(d)
+        primeraPantalla()
 
     titulo = tk.Button(text="Minesweeper", font=("Bahnschrift", 32), command=regresar)
     titulo.grid(column=0, row=0, columnspan=10*d, rowspan=2*d, sticky="NSWE")
@@ -80,6 +98,7 @@ def juego(d):
     #Function declaring what happens when a frame with a bomb is chosen
     #Becomes red, bomb label, missing to end game
     def botonDeBomba(xc, yc):
+        juego.valor = True
         if images[yc][xc] == False:
             LB[yc][xc].configure(bg="red4")
             flagPhoto = tk.Label(LB[yc][xc], image=bomb, bg="red4")
@@ -169,11 +188,13 @@ def juego(d):
 
     def zeroBombs():
         value = True
+
         for a in range(renglones):
             for b in range(columnas):
                 if LV[a][b] is not True and images[a][b] is not False:
                     value = False
         if value:
+            juego.valor = True
             for a in range(renglones):
                 for b in range(columnas):
 
@@ -223,4 +244,40 @@ def juego(d):
 
     win2.mainloop()
 
-juego(3)
+def puntajes():
+    win2 = tk.Tk()
+    win2.title("Minesweeper")
+    win2.iconbitmap(os.path.abspath("BombIcon.ico"))
+
+    win2.mainloop()
+
+def primeraPantalla():
+    primeraPantalla.win1 = tk.Tk()
+    primeraPantalla.win1.geometry("290x406")
+    primeraPantalla.win1.title("Minesweeper")
+    primeraPantalla.win1.iconbitmap(os.path.abspath("BombIcon.ico"))
+
+    titulo = tk.Label(text="Minesweeper", font=("Bahnschrift", 28), fg = "gray")
+    titulo.grid(column=0, row=2, columnspan=3, rowspan=2, sticky="NSWE")
+
+    nivelUno = tk.Button(text="EASY", font=("Bahnschrift"), bg = "gray", fg = "white", command = lambda: juego(1))
+    nivelUno.grid(column=1, row=5, rowspan=2, sticky="NSWE")
+
+    nivelDos = tk.Button(text="MEDIUM", font=("Bahnschrift"), bg = "gray", fg = "white", command = lambda: juego(2))
+    nivelDos.grid(column=1, row=8, rowspan=2, sticky="NSWE")
+
+    nivelDos = tk.Button(text="HARD", font=("Bahnschrift"), bg = "gray", fg = "white", command = lambda: juego(3))
+    nivelDos.grid(column=1, row=11, rowspan=2, sticky="NSWE")
+
+    resultados = tk.Button(text="TOP SCORES", font=("Bahnschrift"), fg = "gray")
+    resultados.grid(column=1, row = 14, sticky = "NSWE")
+
+    #Division of the window into a grid
+    for y in range(16):
+        primeraPantalla.win1.grid_rowconfigure(y, weight=1)
+    for x in range(3):
+        primeraPantalla.win1.grid_columnconfigure(x, weight=1)
+
+    primeraPantalla.win1.mainloop()
+
+primeraPantalla()
